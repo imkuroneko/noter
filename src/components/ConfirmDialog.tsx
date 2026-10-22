@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, type KeyboardEvent } from "react";
-import { cn } from "../lib/cn";
+import { Trash2 } from "lucide-react";
+import { Button } from "./Button";
 import type { ConfirmOptions } from "../stores/confirm";
 
 interface Props extends ConfirmOptions {
@@ -55,25 +56,17 @@ export function ConfirmDialog({ title, message, confirmLabel, danger, onResult }
           {message}
         </p>
         <div className="mt-2 flex justify-end gap-2">
-          <button
-            ref={cancelRef}
-            type="button"
-            onClick={() => onResult(false)}
-            className="h-8 rounded-lg bg-rail px-3.5 text-[12.5px] font-semibold hover:bg-hover"
-          >
+          <Button ref={cancelRef} variant="secondary" onClick={() => onResult(false)}>
             Cancelar
-          </button>
-          <button
+          </Button>
+          <Button
             ref={confirmRef}
-            type="button"
+            variant={danger ? "danger" : "primary"}
+            icon={danger ? Trash2 : undefined}
             onClick={() => onResult(true)}
-            className={cn(
-              "h-8 rounded-lg px-3.5 text-[12.5px] font-semibold",
-              danger ? "bg-danger text-ondanger" : "bg-accent text-onaccent",
-            )}
           >
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

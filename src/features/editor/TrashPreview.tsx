@@ -1,5 +1,6 @@
 import { Emoji } from "../../components/Emoji";
 import { FileText, RotateCcw, Trash2 } from "lucide-react";
+import { Button } from "../../components/Button";
 import { cn } from "../../lib/cn";
 import { fullDate, relativeDate } from "../../lib/date";
 import { useNotes } from "../../stores/notes";
@@ -34,22 +35,18 @@ export function TrashPreview() {
           </span>
         </div>
         <div className="flex flex-none items-center gap-2">
-          <button
-            type="button"
-            onClick={() => void restore(note.id)}
-            className="flex h-[30px] items-center gap-1.5 rounded-lg bg-accent px-3 text-xs font-semibold text-onaccent"
-          >
-            <RotateCcw size={14} aria-hidden="true" />
+          <Button variant="primary" size="sm" icon={RotateCcw} onClick={() => void restore(note.id)}>
             Restaurar
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={Trash2}
             onClick={() => void purgeNoteWithConfirm(note.id, note.title)}
-            className="flex h-[30px] items-center gap-1.5 rounded-lg border border-danger px-3 text-xs font-semibold text-danger hover:bg-hover"
+            className="border border-danger text-danger"
           >
-            <Trash2 size={14} aria-hidden="true" />
             Eliminar definitivamente
-          </button>
+          </Button>
         </div>
       </div>
       <div className="flex-none border-b border-line px-5 py-2 text-xs text-muted" title={fullDate(note.deletedAt)}>

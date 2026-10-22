@@ -7,6 +7,8 @@ export interface MenuItem {
   /** Si trae submenú, al elegirlo se muestra esa lista dentro del mismo menú. */
   submenu?: MenuItem[];
   disabled?: boolean;
+  /** Explicación breve (title) de por qué está deshabilitado. */
+  hint?: string;
   danger?: boolean;
   checked?: boolean;
   separatorBefore?: boolean;

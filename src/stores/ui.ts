@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 export type EditorMode = "edit" | "split" | "view";
+export type VaultDialogId = "vault-new" | "vault-protect" | "vault-password" | "vault-import";
 export type PopoverId = "category-edit" | "category-new" | "theme" | "tags" | "vault";
 
 const MODE_KEY = "noter.mode";
@@ -23,6 +24,9 @@ interface UiState {
   notice: string | null;
   /** El próximo editor que se monte toma el foco. */
   pendingFocus: boolean;
+  /** Diálogo de bóvedas abierto (nueva, proteger, cambiar contraseña). */
+  vaultDialog: VaultDialogId | null;
+  setVaultDialog: (id: VaultDialogId | null) => void;
   setMode: (mode: EditorMode) => void;
   togglePopover: (id: PopoverId) => void;
   openPopover: (id: PopoverId) => void;
@@ -38,6 +42,8 @@ export const useUi = create<UiState>((set, get) => ({
   popover: null,
   notice: null,
   pendingFocus: false,
+  vaultDialog: null,
+  setVaultDialog: (vaultDialog) => set({ vaultDialog, popover: null }),
   setMode: (mode) => {
     set({ mode });
     try {

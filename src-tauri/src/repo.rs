@@ -349,7 +349,7 @@ pub fn tag_list(conn: &Connection, category_id: Option<i64>) -> AppResult<Vec<Ta
 }
 
 /// Quita "#", espacios sobrantes y mayúsculas (COLLATE NOCASE solo cubre ASCII).
-fn normalize_tag(raw: &str) -> String {
+pub(crate) fn normalize_tag(raw: &str) -> String {
     raw.trim().trim_start_matches('#').trim().to_lowercase()
 }
 

@@ -1,8 +1,9 @@
 import { Emoji } from "../../components/Emoji";
 import type { CSSProperties } from "react";
-import { FileText } from "lucide-react";
+import { FileText, RotateCcw } from "lucide-react";
 import type { Category, TrashNote } from "../../api";
 import { cn } from "../../lib/cn";
+import { Button } from "../../components/Button";
 import { relativeDate } from "../../lib/date";
 import { cleanSnippet } from "../../lib/text";
 import { useNotes } from "../../stores/notes";
@@ -67,13 +68,9 @@ export function TrashPanel() {
       <div className="px-4 py-7 text-center text-[12.5px] text-muted">
         <span role="alert">No se pudo cargar la papelera.</span>
         <br />
-        <button
-          type="button"
-          onClick={() => void refresh()}
-          className="mt-2 h-8 rounded-lg bg-rail px-3 text-xs font-semibold hover:bg-hover"
-        >
+        <Button variant="secondary" size="sm" icon={RotateCcw} className="mt-2" onClick={() => void refresh()}>
           Reintentar
-        </button>
+        </Button>
       </div>
     );
   } else if (trash.length === 0) {

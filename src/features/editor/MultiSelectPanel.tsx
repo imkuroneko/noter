@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Trash2 } from "lucide-react";
+import { Button } from "../../components/Button";
 import { useNotes } from "../../stores/notes";
 import { trashManyWithConfirm } from "../notes/actions";
 
@@ -25,21 +26,12 @@ export function MultiSelectPanel() {
         </p>
       </div>
       <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => void trashManyWithConfirm(ids)}
-          className="flex h-8 items-center gap-1.5 rounded-lg bg-danger px-3.5 text-[12.5px] font-semibold text-ondanger"
-        >
-          <Trash2 size={14} aria-hidden="true" />
+        <Button variant="danger" size="sm" icon={Trash2} onClick={() => void trashManyWithConfirm(ids)}>
           Mover a la papelera
-        </button>
-        <button
-          type="button"
-          onClick={clear}
-          className="h-8 rounded-lg bg-rail px-3.5 text-[12.5px] font-semibold hover:bg-hover"
-        >
+        </Button>
+        <Button variant="secondary" size="sm" onClick={clear}>
           Cancelar selección
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -105,6 +105,7 @@ export function ContextMenu({ spec, onClose }: Props) {
             type="button"
             role="menuitem"
             aria-disabled={item.disabled || undefined}
+            title={item.hint}
             aria-haspopup={item.submenu ? "menu" : undefined}
             // El menú no roba el foco ni la selección del editor al pulsar.
             onMouseDown={(e) => e.preventDefault()}

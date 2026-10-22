@@ -14,7 +14,8 @@ export function useDismiss(id: PopoverId, ref: RefObject<HTMLElement | null>): b
     const selector = `[data-popover-trigger="${id}"]`;
     const onDown = (e: PointerEvent) => {
       const target = e.target instanceof Element ? e.target : null;
-      if (target && (ref.current?.contains(target) || target.closest(selector))) return;
+      // Los menús contextuales que nacen del popover no lo cierran.
+      if (target && (ref.current?.contains(target) || target.closest(selector) || target.closest("[role='menu']"))) return;
       close(id);
     };
     const onKey = (e: globalThis.KeyboardEvent) => {

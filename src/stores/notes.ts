@@ -50,6 +50,8 @@ interface NotesState {
   setQuery: (q: string) => void;
   refreshList: (opts?: { reselect?: boolean }) => Promise<void>;
   refreshTags: () => Promise<void>;
+  /** Recarga categorías, etiquetas y lista tras importar notas, sin tocar la nota abierta. */
+  refreshAfterImport: () => Promise<void>;
   selectNote: (id: number) => Promise<void>;
   clickNote: (id: number, mods: { ctrl: boolean; shift: boolean }) => void;
   clearMulti: () => void;
@@ -71,6 +73,8 @@ interface NotesState {
   restoreNote: (id: number) => Promise<void>;
   purgeNote: (id: number) => Promise<void>;
   emptyTrash: () => Promise<void>;
+  /** Vacía todos los datos en memoria (bloqueo o cambio de bóveda). */
+  wipe: () => void;
   reset: () => Promise<void>;
   setNoteTags: (names: string[]) => Promise<void>;
   createCategory: (input: { name: string; emoji: string; hue: number }) => Promise<void>;
@@ -247,6 +251,15 @@ export const useNotes = create<NotesState>((set, get) => {
       } catch {
         if (seq === tagSeq) set({ tagsError: true });
       }
+    },
+
+    refreshAfterImport: async () => {
+      try {
+        set({ categories: await api.categoryList() });
+      } catch (e) {
+        fail(e);
+      }
+      await Promise.all([get().refreshTags(), get().refreshList()]);
     },
 
     selectNote: async (id) => {
@@ -551,6 +564,11 @@ export const useNotes = create<NotesState>((set, get) => {
     },
 
     reset: async () => {
+      get().wipe();
+      await get().init();
+    },
+
+    wipe: () => {
       clearTimers();
       debouncedQuery.cancel();
       listSeq++;
@@ -584,7 +602,6 @@ export const useNotes = create<NotesState>((set, get) => {
         trashSelectedId: null,
         trashStatus: "ready",
       });
-      await get().init();
     },
 
     setNoteTags: async (names) => {

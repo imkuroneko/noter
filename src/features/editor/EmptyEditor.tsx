@@ -1,3 +1,5 @@
+import { Plus } from "lucide-react";
+import { Button } from "../../components/Button";
 import { useNotes } from "../../stores/notes";
 
 export function EmptyEditor() {
@@ -18,13 +20,9 @@ export function EmptyEditor() {
     content = (
       <>
         <span>No hay ninguna nota abierta.</span>
-        <button
-          type="button"
-          onClick={() => void create()}
-          className="h-8 rounded-lg bg-accent px-3.5 text-xs font-semibold text-onaccent"
-        >
+        <Button variant="primary" size="sm" icon={Plus} onClick={() => void create()}>
           Crear una nota
-        </button>
+        </Button>
       </>
     );
   } else {

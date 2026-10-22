@@ -1,10 +1,12 @@
 //! Comandos Tauri. Finos: validan entrada, toman la conexión y llaman a `repo`. Sin SQL.
 
-use crate::db;
 use crate::error::{AppError, AppResult};
+use crate::import::{self, ImportOptions, ImportPreview, ImportResult, ImportSource};
 use crate::repo::{self, Category, ListParams, Note, NoteSummary, TagCount, TrashNote};
 use crate::state::AppState;
-use crate::vaults::{self, Registry};
+use crate::session::{self, VaultStatus};
+use crate::vaults;
+use zeroize::Zeroizing;
 use rusqlite::Connection;
 use serde::Serialize;
 use tauri::State;
@@ -16,6 +18,7 @@ fn with_conn<T>(state: &AppState, f: impl FnOnce(&Connection) -> AppResult<T>) -
         .lock()
         .map_err(|_| AppError::Db("estado interno corrupto".into()))?;
     let conn = guard.as_ref().ok_or(AppError::Locked)?;
+    session::touch(state);
     f(conn)
 }
 
@@ -108,64 +111,148 @@ pub fn trash_empty(state: State<'_, AppState>) -> AppResult<usize> {
 // ---------- Bóvedas ----------
 
 #[derive(Serialize)]
-pub struct VaultSummary {
-    pub id: String,
-    pub name: String,
+#[serde(rename_all = "camelCase")]
+pub struct VaultCreated {
+    pub status: VaultStatus,
+    /// Solo cuando la bóveda nueva tiene contraseña; se muestra una única vez.
+    pub recovery_key: Option<String>,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct VaultList {
-    pub vaults: Vec<VaultSummary>,
-    pub active_id: Option<String>,
-}
-
-fn vault_list_from(reg: &Registry) -> VaultList {
-    VaultList {
-        vaults: reg.vaults.iter().map(|v| VaultSummary { id: v.id.clone(), name: v.name.clone() }).collect(),
-        active_id: reg.active_id.clone(),
-    }
-}
-
-/// Abre la bóveda `id` (reemplaza la conexión actual) y la recuerda como activa.
-pub fn open_vault(state: &AppState, id: &str) -> AppResult<()> {
-    let mut reg = vaults::load(&state.dir)?;
-    let info = reg.vaults.iter().find(|v| v.id == id).ok_or(AppError::NotFound)?.clone();
-    // Fase 1: sin contraseña (clave vacía). La bóveda cifrada llega en la fase 5.
-    let conn = db::open(&state.dir.join(&info.file), "")?;
-    repo::seed_if_new(&conn)?;
-    *state.conn.lock().map_err(|_| AppError::Db("estado interno corrupto".into()))? = Some(conn);
-    reg.active_id = Some(info.id);
-    vaults::save(&state.dir, &reg)
+pub struct VaultProtected {
+    pub status: VaultStatus,
+    pub recovery_key: String,
+    /// Copia sin cifrar de la base original, en la carpeta `backups` de los datos de la app.
+    pub backup_file: String,
 }
 
 #[tauri::command]
-pub fn vault_list(state: State<'_, AppState>) -> AppResult<VaultList> {
-    Ok(vault_list_from(&vaults::load(&state.dir)?))
+pub fn vault_list(state: State<'_, AppState>) -> AppResult<VaultStatus> {
+    session::status(&state)
 }
 
 #[tauri::command]
-pub fn vault_create(state: State<'_, AppState>, name: String) -> AppResult<VaultList> {
-    let mut reg = vaults::load(&state.dir)?;
-    reg.vaults.push(vaults::new_vault(&name)?);
-    vaults::save(&state.dir, &reg)?;
-    Ok(vault_list_from(&reg))
-}
-
-#[tauri::command]
-pub fn vault_rename(state: State<'_, AppState>, id: String, name: String) -> AppResult<VaultList> {
+pub fn vault_rename(state: State<'_, AppState>, id: String, name: String) -> AppResult<VaultStatus> {
     let mut reg = vaults::load(&state.dir)?;
     let name = vaults::clean_name(&name)?;
     reg.vaults.iter_mut().find(|v| v.id == id).ok_or(AppError::NotFound)?.name = name;
     vaults::save(&state.dir, &reg)?;
-    Ok(vault_list_from(&reg))
+    session::status(&state)
 }
 
-/// Cambia a otra bóveda. El frontend debe recargar categorías, etiquetas y notas.
+/// Cambia a otra bóveda. Si está protegida, queda en la pantalla de bloqueo hasta desbloquearla.
+/// El frontend debe recargar categorías, etiquetas y notas.
 #[tauri::command]
-pub fn vault_switch(state: State<'_, AppState>, id: String) -> AppResult<VaultList> {
-    open_vault(&state, &id)?;
-    Ok(vault_list_from(&vaults::load(&state.dir)?))
+pub fn vault_switch(state: State<'_, AppState>, id: String) -> AppResult<VaultStatus> {
+    session::activate(&state, &id)
+}
+
+// Las órdenes que derivan claves (Argon2) son async para no congelar la interfaz.
+
+#[tauri::command]
+pub async fn vault_create(
+    state: State<'_, AppState>,
+    name: String,
+    password: Option<String>,
+    folder: Option<String>,
+) -> AppResult<VaultCreated> {
+    let password = password.map(Zeroizing::new);
+    let (status, recovery_key) =
+        session::create_vault(&state, &name, password.as_ref().map(|p| p.as_str()), folder.as_deref())?;
+    Ok(VaultCreated { status, recovery_key })
+}
+
+/// Agrega a la lista una bóveda que ya existe en otra carpeta (ruta de su archivo .db).
+#[tauri::command]
+pub fn vault_open_existing(state: State<'_, AppState>, path: String) -> AppResult<VaultStatus> {
+    session::open_existing(&state, &path)
+}
+
+/// Apunta una bóveda de la lista a otro archivo .db (por ejemplo, tras moverla de carpeta).
+#[tauri::command]
+pub fn vault_relocate(state: State<'_, AppState>, id: String, path: String) -> AppResult<VaultStatus> {
+    session::relocate(&state, &id, &path)
+}
+
+/// Quita una bóveda de la lista sin borrar sus archivos.
+#[tauri::command]
+pub fn vault_forget(state: State<'_, AppState>, id: String) -> AppResult<VaultStatus> {
+    session::forget(&state, &id)
+}
+
+#[tauri::command]
+pub async fn vault_unlock(state: State<'_, AppState>, id: String, password: String) -> AppResult<VaultStatus> {
+    let password = Zeroizing::new(password);
+    session::unlock(&state, &id, &password)
+}
+
+#[tauri::command]
+pub fn vault_lock(state: State<'_, AppState>) -> AppResult<VaultStatus> {
+    session::lock(&state)
+}
+
+#[tauri::command]
+pub async fn vault_protect(state: State<'_, AppState>, password: String) -> AppResult<VaultProtected> {
+    let password = Zeroizing::new(password);
+    let done = session::protect(&state, &password)?;
+    Ok(VaultProtected { status: session::status(&state)?, recovery_key: done.recovery_key, backup_file: done.backup_file })
+}
+
+#[tauri::command]
+pub async fn vault_change_password(state: State<'_, AppState>, id: String, old_password: String, new_password: String) -> AppResult<()> {
+    let (old, new) = (Zeroizing::new(old_password), Zeroizing::new(new_password));
+    session::change_password(&state, &id, &old, &new)
+}
+
+#[tauri::command]
+pub async fn vault_recover(state: State<'_, AppState>, id: String, recovery_key: String, new_password: String) -> AppResult<VaultStatus> {
+    let (key, new) = (Zeroizing::new(recovery_key), Zeroizing::new(new_password));
+    session::recover(&state, &id, &key, &new)
+}
+
+/// Borra (sobrescribiendo con ceros) una copia sin cifrar que dejó `vault_protect`.
+#[tauri::command]
+pub fn vault_delete_backup(state: State<'_, AppState>, file: String) -> AppResult<VaultStatus> {
+    session::delete_backup(&state, &file)
+}
+
+#[tauri::command]
+pub fn vault_set_idle(state: State<'_, AppState>, minutes: u32) -> AppResult<VaultStatus> {
+    session::set_idle(&state, minutes)
+}
+
+/// El frontend avisa de actividad (con límite de frecuencia) para el bloqueo por inactividad.
+#[tauri::command]
+pub fn vault_touch(state: State<'_, AppState>) {
+    session::touch(&state);
+}
+
+// ---------- Importar desde otra bóveda ----------
+
+/// Datos básicos del archivo elegido (nombre y si pide contraseña), sin leer su contenido.
+#[tauri::command]
+pub fn import_inspect(path: String) -> AppResult<ImportSource> {
+    import::inspect(&path)
+}
+
+/// Lista las categorías y notas de la bóveda de origen para elegir qué importar.
+#[tauri::command]
+pub async fn import_preview(state: State<'_, AppState>, path: String, password: Option<String>) -> AppResult<ImportPreview> {
+    let password = password.map(Zeroizing::new);
+    import::preview(&state, &path, password.as_ref().map(|p| p.as_str()))
+}
+
+/// Agrega las notas elegidas a la bóveda abierta.
+#[tauri::command]
+pub async fn import_run(
+    state: State<'_, AppState>,
+    path: String,
+    password: Option<String>,
+    options: ImportOptions,
+) -> AppResult<ImportResult> {
+    let password = password.map(Zeroizing::new);
+    import::run(&state, &path, password.as_ref().map(|p| p.as_str()), &options)
 }
 
 #[tauri::command]

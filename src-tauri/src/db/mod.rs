@@ -10,6 +10,9 @@ use std::time::Duration;
 /// Para agregar una: nuevo archivo NNNN_nombre.sql (+ su .down.sql de referencia) y una linea aqui. Nunca editar una ya publicada.
 const MIGRATIONS: &[&str] = &[include_str!("migrations/0001_init.sql")];
 
+/// Versión del esquema que entiende esta app (cantidad de migraciones).
+pub const SCHEMA_VERSION: usize = MIGRATIONS.len();
+
 const QUERIES: &str = include_str!("queries.sql");
 
 /// Devuelve el SQL del bloque `-- name: <name>` de queries.sql.

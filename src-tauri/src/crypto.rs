@@ -23,9 +23,9 @@ const AAD_RECOVERY: &[u8] = b"noter/dek/recovery/v1";
 /// Parámetros por defecto de Argon2id: 64 MiB, 3 pasadas, 1 hilo.
 pub const DEFAULT_KDF: (u32, u32, u32) = (64 * 1024, 3, 1);
 /// Límites al leer un archivo de claves, para que uno manipulado no pida memoria o tiempo absurdos.
-const MAX_M_KIB: u32 = 1024 * 1024;
-const MAX_T: u32 = 12;
-const MAX_P: u32 = 8;
+const MAX_M_KIB: u32 = 256 * 1024;
+const MAX_T: u32 = 8;
+const MAX_P: u32 = 4;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum CryptoError {
@@ -163,7 +163,16 @@ fn check_version(header: &KeyHeader) -> Result<(), CryptoError> {
 
 /// Clave en el formato de SQLCipher para claves crudas: x'<64 hex>'.
 pub fn sql_key(dek: &Secret32) -> Zeroizing<String> {
-    Zeroizing::new(format!("x'{}'", data_encoding::HEXLOWER.encode(&dek[..])))
+    // Se arma en un solo buffer protegido: sin cadenas intermedias con la clave.
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut s = Zeroizing::new(String::with_capacity(67));
+    s.push_str("x'");
+    for b in dek.iter() {
+        s.push(HEX[(b >> 4) as usize] as char);
+        s.push(HEX[(b & 15) as usize] as char);
+    }
+    s.push('\'');
+    s
 }
 
 /// 52 caracteres base32 en grupos de 4 separados por guiones.

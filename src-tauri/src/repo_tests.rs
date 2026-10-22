@@ -129,8 +129,10 @@ fn registro_de_boveda_inicial_y_nuevas() {
 /// Cambiar de bóveda de punta a punta: cada una tiene sus propios datos y el cambio persiste.
 #[test]
 fn cambio_de_boveda_aisla_los_datos() {
-    use crate::commands::open_vault;
+    use crate::session;
     use crate::state::AppState;
+
+    let open_vault = |s: &AppState, id: &str| session::activate(s, id).map(|_| ());
 
     let dir = std::env::temp_dir().join(format!("noter_switch_{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
@@ -146,11 +148,8 @@ fn cambio_de_boveda_aisla_los_datos() {
     with(&|c| assert_eq!(category_list(c).unwrap().len(), 4));
 
     // Se crea una segunda bóveda y se escribe algo solo en la primera.
-    let mut reg = crate::vaults::load(&dir).unwrap();
-    let second = crate::vaults::new_vault("Trabajo").unwrap();
-    let second_id = second.id.clone();
-    reg.vaults.push(second);
-    crate::vaults::save(&dir, &reg).unwrap();
+    session::create_vault(&state, "Trabajo", None, None).unwrap();
+    let second_id = crate::vaults::load(&dir).unwrap().vaults.last().unwrap().id.clone();
     with(&|c| {
         let n = note_create(c, None).unwrap();
         note_update(c, n.id, "Solo en la primera", "x").unwrap();

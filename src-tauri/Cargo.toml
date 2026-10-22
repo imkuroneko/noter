@@ -1,8 +1,10 @@
 [package]
 name = "noter"
-version = "0.1.0"
+version = "1.0.0"
 description = "Noter: notas en Markdown con bóveda cifrada"
 authors = ["kuroneko"]
+license = "GPL-3.0-only"
+repository = "https://github.com/imkuroneko/noter"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -23,12 +25,13 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rusqlite = { version = "0.40", features = ["bundled-sqlcipher-vendored-openssl"] }
-argon2 = "0.6.0"
-chacha20poly1305 = "0.11.0"
+argon2 = { version = "0.6.0", features = ["zeroize"] }
+chacha20poly1305 = { version = "0.11.0", features = ["zeroize"] }
 getrandom = "0.4.3"
 zeroize = "1.9.1"
 base64 = "0.23.1"
 data-encoding = "2.11.1"
+tauri-plugin-dialog = "2.8.3"
 
 # Argon2 sin optimizar tarda segundos por intento en desarrollo; en release ya va optimizado.
 [profile.dev.package.argon2]

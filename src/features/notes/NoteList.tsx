@@ -1,5 +1,7 @@
 import { useCallback, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { Plus, RotateCcw } from "lucide-react";
 import type { NoteSummary } from "../../api";
+import { Button } from "../../components/Button";
 import { arrowNav } from "../../lib/useDismiss";
 import { useMenu } from "../../stores/menu";
 import { useNotes } from "../../stores/notes";
@@ -79,13 +81,9 @@ export function NoteList() {
   };
 
   const retry = (
-    <button
-      type="button"
-      onClick={() => void (loaded ? refresh() : init())}
-      className="mt-2 h-8 rounded-lg bg-rail px-3 text-xs font-semibold hover:bg-hover"
-    >
+    <Button variant="secondary" size="sm" icon={RotateCcw} className="mt-2" onClick={() => void (loaded ? refresh() : init())}>
       Reintentar
-    </button>
+    </Button>
   );
 
   let body: ReactNode;
@@ -118,13 +116,9 @@ export function NoteList() {
       <Message>
         Todavía no hay notas aquí.
         <br />
-        <button
-          type="button"
-          onClick={() => void create()}
-          className="mt-2 h-8 rounded-lg bg-accent px-3 text-xs font-semibold text-onaccent"
-        >
+        <Button variant="primary" size="sm" icon={Plus} className="mt-2" onClick={() => void create()}>
           Crear una nota
-        </button>
+        </Button>
       </Message>
     );
   } else {
