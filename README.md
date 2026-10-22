@@ -4,7 +4,6 @@ Notas en Markdown para el escritorio, con categorías, etiquetas, búsqueda de t
 
 <img width="1282" height="802" alt="image" src="https://github.com/user-attachments/assets/273f3322-1585-4615-a38a-6af65eaeea10" />
 
-**Versión 1.0.0** · Repositorio: <https://github.com/imkuroneko/noter> (rama principal: `main`)
 
 ![Tauri](https://img.shields.io/badge/Tauri-v2-24C8DB?logo=tauri&logoColor=white)
 ![Rust](https://img.shields.io/badge/Rust-edici%C3%B3n%202024-000000?logo=rust&logoColor=white)
@@ -397,7 +396,7 @@ Remove-Item "$env:APPDATA\com.kuroneko.noter" -Recurse -Force
 
 ## 📦 Generar el instalador
 
-> **Estado: pendiente.** La configuración del instalador está lista, pero **el instalador todavía no se ha generado ni probado**. Está previsto hacerlo próximamente. Nada de lo que sigue se ha comprobado con un archivo real.
+> **Estado:** el instalador se genera correctamente (versión 1.0.0 compilada y probada a mano de forma parcial). Esa prueba detectó que los emojis no se veían en la versión instalada por la política de contenido estricta; está corregido en la **1.0.1**. Aún falta una prueba completa de la versión instalada (enlaces, selectores de carpeta y archivo, guardar al cerrar, flujo de cifrado e importación).
 
 ### Cómo generarlo
 
@@ -412,18 +411,18 @@ Configuración del empaquetado (`tauri.conf.json`):
 - Solo se genera **NSIS** (`bundle.targets = ["nsis"]`).
 - Instalación por usuario, sin administrador (`installMode: currentUser`).
 - Idioma del instalador: español (`Spanish`), sin selector de idioma.
-- Versión `1.0.0`, igual en `package.json`, `Cargo.toml` y `tauri.conf.json`.
+- Versión `1.0.1`, igual en `package.json`, `Cargo.toml` y `tauri.conf.json`.
 - Editor: `kuroneko`; categoría: Productividad.
 
-### Nombre y ruta del archivo: por confirmar
+### Dónde queda el archivo
 
-Con el `target-dir` personalizado, el instalador debería quedar en una carpeta como esta:
+Con el `target-dir` personalizado (`C:/t/noter`), el instalador queda en:
 
 ```text
-C:\t\noter\release\bundle\nsis\
+C:\t\noter\release\bundle\nsis\Noter_<versión>_x64-setup.exe
 ```
 
-**[POR CONFIRMAR]** la ruta y el nombre exacto del `.exe` (por convención de Tauri sería algo como `Noter_1.0.0_x64-setup.exe`, pero no está verificado): al escribir esto, esa carpeta aún no existía. Revisa el archivo real tras compilar.
+Por ejemplo, la versión 1.0.0 se generó como `Noter_1.0.0_x64-setup.exe` (unos 7,6 MB). El nombre cambia con la versión.
 
 ### Antes de distribuirlo
 
@@ -433,7 +432,7 @@ C:\t\noter\release\bundle\nsis\
 
 ### Alternativa: el `.exe` suelto (portable)
 
-La compilación de producción también deja el ejecutable suelto en la carpeta `release` del `target-dir` [POR CONFIRMAR: nombre y ruta exactos]. Funciona sin instalar, pero no crea acceso directo ni desinstalador, y necesita **WebView2** (ya viene en Windows 11).
+La compilación de producción también deja el ejecutable suelto en `C:\t\noter\release\noter.exe` (unos 15 MB). Funciona sin instalar, pero no crea acceso directo ni desinstalador, y necesita **WebView2** (ya viene en Windows 11).
 
 ## 🧪 Pruebas
 

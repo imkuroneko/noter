@@ -1,6 +1,6 @@
 [package]
 name = "noter"
-version = "1.0.0"
+version = "1.0.1"
 description = "Noter: notas en Markdown con bóveda cifrada"
 authors = ["kuroneko"]
 license = "GPL-3.0-only"
