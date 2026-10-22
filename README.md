@@ -2,6 +2,8 @@
 
 Notas en Markdown para el escritorio, con categorías, etiquetas, búsqueda de texto completo y bóvedas que puedes proteger con contraseña. Tus datos viven en tu equipo, en archivos SQLite (cifrados con SQLCipher cuando la bóveda tiene contraseña).
 
+<img width="1282" height="802" alt="image" src="https://github.com/user-attachments/assets/273f3322-1585-4615-a38a-6af65eaeea10" />
+
 **Versión 1.0.0** · Repositorio: <https://github.com/imkuroneko/noter> (rama principal: `main`)
 
 ![Tauri](https://img.shields.io/badge/Tauri-v2-24C8DB?logo=tauri&logoColor=white)
