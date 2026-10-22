@@ -1,0 +1,3 @@
+# Ruta corta: OpenSSL (SQLCipher) falla en Windows si la ruta de compilacion pasa de 260 caracteres.
+[build]
+target-dir = "C:/t/noter"

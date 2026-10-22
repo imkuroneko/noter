@@ -1,0 +1,130 @@
+@import "tailwindcss";
+@import "@fontsource/figtree/400.css";
+@import "@fontsource/figtree/500.css";
+@import "@fontsource/figtree/600.css";
+@import "@fontsource/figtree/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "./theme/tokens.css";
+
+@theme inline {
+  --color-rail: var(--rail);
+  --color-side: var(--side);
+  --color-main: var(--main);
+  --color-hover: var(--hover);
+  --color-line: var(--line);
+  --color-fg: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-onaccent: var(--onaccent);
+  --color-soft: var(--soft);
+  --color-code: var(--code);
+  --color-danger: var(--danger);
+  --color-ondanger: var(--ondanger);
+  --font-sans: "Figtree", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: var(--main);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  html {
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  button {
+    cursor: default;
+    text-align: left;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  /* Solo se puede seleccionar texto en campos, en el editor y en la vista previa. */
+  input,
+  textarea,
+  .cm-content,
+  .cm-content *,
+  [data-selectable],
+  [data-selectable] *,
+  em-emoji-picker {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  input,
+  textarea,
+  .cm-content,
+  [data-selectable] {
+    cursor: text;
+  }
+  [data-selectable] button,
+  [data-selectable] a {
+    cursor: default;
+  }
+  [data-selectable]:focus {
+    outline: none;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  input::placeholder {
+    color: var(--muted);
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}
+
+/* Resaltado de código (rehype-highlight) con los colores del tema */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta,
+.hljs-tag {
+  color: var(--accent);
+}
+.hljs-string,
+.hljs-attr,
+.hljs-attribute,
+.hljs-regexp {
+  color: var(--hl-str);
+}
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: var(--hl-num);
+}
+.hljs-title,
+.hljs-built_in,
+.hljs-type,
+.hljs-function {
+  color: var(--hl-fn);
+}
+.hljs-comment,
+.hljs-quote {
+  color: var(--muted);
+  font-style: italic;
+}

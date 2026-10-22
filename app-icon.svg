@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9a6cff"/>
+      <stop offset="1" stop-color="#5a2bc8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="232" fill="url(#bg)"/>
+  <g transform="translate(512 512) rotate(45) scale(1.22) translate(-512 -500)">
+    <!-- goma -->
+    <rect x="437" y="205" width="150" height="70" rx="30" fill="#ff9ec4"/>
+    <!-- virola -->
+    <rect x="437" y="275" width="150" height="42" fill="#d8cdf5"/>
+    <!-- cuerpo -->
+    <rect x="437" y="317" width="75" height="335" fill="#ffffff"/>
+    <rect x="512" y="317" width="75" height="335" fill="#e6dbff"/>
+    <!-- madera y mina -->
+    <polygon points="437,652 587,652 512,792" fill="#ffd9b3"/>
+    <polygon points="486,752 538,752 512,792" fill="#2f1678"/>
+  </g>
+</svg>

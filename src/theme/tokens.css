@@ -1,0 +1,51 @@
+/* Los tokens salen de un solo matiz (--h). Las paletas solo cambian --h. */
+:root {
+  --h: 265;
+}
+
+:root[data-theme="dark"] {
+  --rail: hsl(var(--h) 18% 8%);
+  --side: hsl(var(--h) 16% 11%);
+  --main: hsl(var(--h) 14% 14%);
+  --hover: hsl(var(--h) 14% 20%);
+  --line: hsl(var(--h) 12% 22%);
+  --text: hsl(var(--h) 20% 92%);
+  --muted: hsl(var(--h) 10% 69%);
+  --accent: hsl(var(--h) 72% 72%);
+  --onaccent: hsl(var(--h) 40% 10%);
+  --soft: hsl(var(--h) 60% 70% / 0.16);
+  --code: hsl(var(--h) 16% 10%);
+  /* Tinte en reposo de las categorías (saturación y luminosidad) */
+  --tint-s: 30%;
+  --tint-l: 24%;
+  /* Colores de sintaxis para el código */
+  --hl-str: hsl(150 45% 62%);
+  --hl-num: hsl(35 80% 66%);
+  --hl-fn: hsl(210 70% 72%);
+  /* Acciones destructivas */
+  --danger: hsl(0 78% 68%);
+  --ondanger: hsl(0 40% 10%);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --rail: hsl(var(--h) 22% 90%);
+  --side: hsl(var(--h) 24% 94%);
+  --main: hsl(var(--h) 30% 98.5%);
+  --hover: hsl(var(--h) 22% 86%);
+  --line: hsl(var(--h) 16% 82%);
+  --text: hsl(var(--h) 30% 13%);
+  --muted: hsl(var(--h) 10% 37%);
+  --accent: hsl(var(--h) 65% 37%);
+  --onaccent: #ffffff;
+  --soft: hsl(var(--h) 65% 45% / 0.12);
+  --code: hsl(var(--h) 22% 94%);
+  --tint-s: 60%;
+  --tint-l: 82%;
+  --hl-str: hsl(150 55% 26%);
+  --hl-num: hsl(30 85% 32%);
+  --hl-fn: hsl(210 65% 36%);
+  --danger: hsl(0 68% 42%);
+  --ondanger: #ffffff;
+  color-scheme: light;
+}
